@@ -1,12 +1,9 @@
 
-#[macro_use]
-extern crate diesel;
-extern crate dotenv;
 
-pub mod models;
-pub mod schema;
 
 use std::env;
+
+use dotenv;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 
@@ -17,9 +14,9 @@ pub fn establish_connection() -> PgConnection {
     PgConnection::establish(&database_url).unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
 }
 
-use models::{Protocol, NewProtocol};
-use schema::protocols as ProtocolsTable;
-use ProtocolsTable::dsl as ProtocolsTableDSL;
+
+use super::schema::protocols;
+use super::schema::pairs;
 
 /*
     let _protocol = create_protocol(
@@ -44,7 +41,7 @@ pub fn create_protocol<'a>(
     factory_address: &'a str) -> Protocol {
 
     let new_protocol = NewProtocol { name, official_url, network, description, symbol, router_address, factory_address };
-    diesel::insert_into(ProtocolsTable::table)
+    diesel::insert_into(protocols::table)
         .values(&new_protocol)
         .get_result(conn)
         .expect("Error saving new protocol")
@@ -52,13 +49,13 @@ pub fn create_protocol<'a>(
 
 pub fn delete_protocol<'a>(conn: &PgConnection, name: &'a str) {
 
-    let num_deleted = diesel::delete(ProtocolsTable::table.filter( ProtocolsTableDSL::name.like(name)))
+    let num_deleted = diesel::delete(protocols::table.filter( protocols::dsl::name.like(name)))
         .execute(conn)
         .expect("Error deleting protocol");
 }
 
 pub fn select_protocols<'a>(conn: &PgConnection, factory_address: &'a str) {
-    let results = ProtocolsTable::table
+    let results = protocols::table
         .load::<Protocol>(conn)
         .expect("Error loading protocols");
 
@@ -73,5 +70,61 @@ pub fn select_protocols<'a>(conn: &PgConnection, factory_address: &'a str) {
             }
         }
     }
+}
+
+use diesel::Queryable;
+
+#[derive(Queryable)]
+pub struct Protocol {
+    pub id: i64,
+    pub name: String,
+    pub official_url: Option<String>,
+    pub network: String,
+    pub description: Option<String>,
+    pub symbol: Option<String>,
+    pub router_address: String,
+    pub factory_address: String,
+}
+
+#[derive(Queryable)]
+pub struct Pair {
+    pub id: i64,
+    pub pair_address: String,
+    pub pair_index: i64,
+    pub token0: String,
+    pub token1: String,
+    pub reserve0: String,
+    pub reserve1: String,
+    pub factory: String,
+    pub created_at_timestamp: Option<i64>,
+    pub created_at_block_number: Option<i64>,
+}
+
+use diesel::Insertable;
+
+#[derive(Insertable)]
+#[table_name="protocols"]
+pub struct NewProtocol<'a> {
+    pub name: &'a str,
+    pub official_url: Option<&'a str>,
+    pub network: &'a str,
+    pub description: Option<&'a str>,
+    pub symbol: Option<&'a str>,
+    pub router_address: &'a str,
+    pub factory_address: &'a str,
+}
+
+#[derive(Insertable)]
+#[table_name="pairs"]
+pub struct NewPair<'a> {
+    pub pair_address: &'a str,
+    pub pair_index: i64,
+    pub token0: &'a str,
+    pub token1: &'a str,
+    pub reserve0: i64,
+    pub reserve1: i64,
+    pub factory: &'a str,
+    pub created_at_timestamp: Option<i64>,
+    pub created_at_block_number: Option<i64>,
 }
 
