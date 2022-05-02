@@ -1,15 +1,47 @@
 pub mod ethereum;
 
-
-enum SyncState {
-    case monitoring
-    case
+#[derive(Debug)]
+pub enum Chain {
+    Ethereum,
 }
 
-fn check_sync_state() {
+#[derive(Debug)]
+pub enum Protocol {
+    UNISwapV2,
+}
+
+#[derive(Debug)]
+pub enum State {
+    Monitoring,
+    Syncing,
+    Stop
+}
+
+#[derive(Debug)]
+pub enum Event {
+    PairCreated,
+    LiquidityAdded,
+    LiquidityRemoved
+}
+
+pub fn check_sync_state() {
 
 }
 
-async fn sync() {
+pub async fn sync() {
 
+}
+
+pub fn subscribe(event: Event) {
+    match event {
+        Event::PairCreated => {
+
+        }
+        Event::LiquidityAdded => {
+            println!("LiquidityAdded")
+        }
+        Event::LiquidityRemoved => {
+            println!("LiquidityRemoved")
+        }
+    }
 }

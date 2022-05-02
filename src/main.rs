@@ -5,6 +5,7 @@ mod chain;
 mod db;
 
 use actix_web::{App, get, HttpServer, Responder, web};
+use tokio::io::AsyncSeek;
 
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -13,19 +14,17 @@ async fn main() -> std::io::Result<()> {
     //     .run()
     //     .await
 
+    // chain::check_sync_state();
+
+    let eth = chain::ethereum::Ethereum::init();
+    eth.start_sync_from(1).await;
     Ok(())
 }
 
-//
-// #[get("/hello/{name}")]
-// async fn greet(name: web::Path<String>) -> impl Responder {
-//     format!("Hello {name}!")
-// }
-//
-// #[get("/lps/{address}")]
-// async fn liquidity_pool(address: web::Path<String>) -> impl Responder {
-//     format!("Hello {address}!")
-// }
+#[get("/lps/{address}")]
+async fn liquidity_pool(address: web::Path<String>) -> impl Responder {
+    format!("Hello {address}!")
+}
 
 //
 // async fn say_hello() {
