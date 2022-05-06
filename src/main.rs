@@ -1,39 +1,29 @@
 #[macro_use]
 extern crate diesel;
 
-mod chain;
 mod db;
+mod handler;
 
-use actix_web::{App, get, HttpServer, Responder, web};
+use actix_web::middleware::Logger;
+use actix_web::{web, App, HttpServer, HttpResponse, Responder, HttpRequest,
+                body::BoxBody,
+                http::header::ContentType};
+
 use tokio::io::AsyncSeek;
+use db::postgres::State;
 
-#[actix_web::main] // or #[tokio::main]
+
+#[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // HttpServer::new(|| { App::new().service(greet) })
-    //     .bind(("127.0.0.1", 8080))?
-    //     .run()
-    //     .await
-
-    // chain::check_sync_state();
-
+    let state = State::init();
     let eth = chain::ethereum::Ethereum::init();
     eth.start_sync_from(1).await;
-    Ok(())
-}
 
-#[get("/lps/{address}")]
-async fn liquidity_pool(address: web::Path<String>) -> impl Responder {
-    format!("Hello {address}!")
+    HttpServer::new(|| {
+        App::new()
+            .route("/lps", web::get().to(liquidity_pool()))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
-
-//
-// async fn say_hello() {
-//     println!("my tokio");
-// }
-//
-// #[tokio::main]
-// async fn main() {
-//     let op = say_hello();
-//     println!("hello");
-//     op.await;
-// }

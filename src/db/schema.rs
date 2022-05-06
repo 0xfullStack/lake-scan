@@ -8,8 +8,6 @@ table! {
         reserve0 -> Int8,
         reserve1 -> Int8,
         factory -> Bpchar,
-        created_at_timestamp -> Nullable<Int8>,
-        created_at_block_number -> Nullable<Int8>,
     }
 }
 

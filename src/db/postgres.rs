@@ -71,9 +71,7 @@ pub struct NewPair {
     pub token1: String,
     pub reserve0: i64,
     pub reserve1: i64,
-    pub factory: String,
-    pub created_at_timestamp: Option<i64>,
-    pub created_at_block_number: Option<i64>,
+    pub factory: String
 }
 
 impl Message for NewPair {

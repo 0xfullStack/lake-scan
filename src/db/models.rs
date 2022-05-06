@@ -7,7 +7,9 @@ use super::schema::pairs::dsl::pairs as get_paris;
 use super::schema::protocols::dsl::protocols as get_protocols;
 use super::postgres::{NewPair, NewProtocol};
 
-#[derive(Queryable, Debug)]
+use serde::Serialize;
+
+#[derive(Queryable, Debug, Serialize)]
 pub struct Protocol {
     pub id: i64,
     pub name: String,
@@ -65,9 +67,7 @@ pub struct Pair {
     pub token1: String,
     pub reserve0: i64,
     pub reserve1: i64,
-    pub factory: String,
-    pub created_at_timestamp: Option<i64>,
-    pub created_at_block_number: Option<i64>,
+    pub factory: String
 }
 
 impl Pair {
