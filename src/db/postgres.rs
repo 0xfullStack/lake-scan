@@ -1,6 +1,3 @@
-
-
-
 use std::env;
 use std::ops::Deref;
 use dotenv;
@@ -11,7 +8,7 @@ use actix::{Addr, SyncArbiter, Handler, Message, Actor, SyncContext};
 use actix::fut::err;
 use actix_web::{error, Error};
 use serde_derive::{Serialize, Deserialize};
-use super::models::{Protocol, Pair};
+use crate::models::{Protocol, Pair};
 use super::schema::{pairs, protocols};
 
 const DB_MAX_CONNECTION: usize = 3;
@@ -44,52 +41,6 @@ impl State {
     }
 }
 
-#[derive(Insertable)]
-#[derive(Serialize, Deserialize, Debug)]
-#[table_name="protocols"]
-pub struct NewProtocol {
-    pub name: String,
-    pub official_url: Option<String>,
-    pub network: String,
-    pub description: Option<String>,
-    pub symbol: Option<String>,
-    pub router_address: String,
-    pub factory_address: String,
-}
-
-impl Message for NewProtocol {
-    type Result = Result<(), Error>;
-}
-
-#[derive(Insertable)]
-#[derive(Serialize, Deserialize, Debug)]
-#[table_name="pairs"]
-pub struct NewPair {
-    pub pair_address: String,
-    pub pair_index: i64,
-    pub token0: String,
-    pub token1: String,
-    pub reserve0: i64,
-    pub reserve1: i64,
-    pub factory: String
-}
-
-impl Message for NewPair {
-    type Result = Result<(), Error>;
-}
-
-pub struct GetPairs;
-pub struct GetProtocols;
-
-impl Message for GetPairs {
-    type Result = Result<Vec<Pair>, Error>;
-}
-impl Message for GetProtocols {
-    type Result = Result<Vec<Protocol>, Error>;
-}
-
-
-
 pub struct Db(pub PgPool);
 
 impl Db {
@@ -102,14 +53,14 @@ impl Actor for Db {
     type Context = SyncContext<Self>;
 }
 
-impl Handler<NewPair> for Db {
-    type Result = Result<(), Error>;
+pub struct GetPairs;
+pub struct GetProtocols;
 
-    fn handle(&mut self, msg: NewPair, ctx: &mut Self::Context) -> Self::Result {
-        Pair::add_pair(msg, self.get_connection()?.deref())
-            .map(|_| ())
-            .map_err(|_| error::ErrorInternalServerError("Faied inserting new pair"))
-    }
+impl Message for GetPairs {
+    type Result = Result<Vec<Pair>, Error>;
+}
+impl Message for GetProtocols {
+    type Result = Result<Vec<Protocol>, Error>;
 }
 
 impl Handler<GetPairs> for Db {
@@ -119,17 +70,6 @@ impl Handler<GetPairs> for Db {
     fn handle(&mut self, msg: GetPairs, ctx: &mut Self::Context) -> Self::Result {
         Pair::get_pairs(self.get_connection()?.deref())
             .map_err(|_| error::ErrorInternalServerError("Failed to retrive pairs"))
-    }
-}
-
-
-impl Handler<NewProtocol> for Db {
-    type Result = Result<(), Error>;
-
-    fn handle(&mut self, msg: NewProtocol, ctx: &mut Self::Context) -> Self::Result {
-        Protocol::add_protocol(msg, self.get_connection()?.deref())
-            .map(|_| ())
-            .map_err(|_| error::ErrorInternalServerError("Faied inserting new protocol"))
     }
 }
 
