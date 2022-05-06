@@ -56,14 +56,4 @@ fn server_error<B>(mut res: dev::ServiceResponse<B>) -> Result<ErrorHandlerRespo
     Ok(ErrorHandlerResponse::Response(res))
 }
 
-pub mod default {
-    pub mod handler {
-        use actix_web::HttpResponse;
-        pub async fn index() -> HttpResponse {
-            HttpResponse::Ok()
-                .body("rusher")
-        }
-    }
-}
-
 
