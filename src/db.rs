@@ -9,9 +9,6 @@ use super::db::schema::{pairs, protocols};
 
 use super::models::{ Protocol, Pair };
 
-pub type ProtocolId = i64;
-pub type PairId = i64;
-
 impl Protocol {
     pub fn get_protocols(conn: &PgConnection) -> QueryResult<Vec<Protocol>> {
         protocols::dsl::protocols.order(protocols::id.desc()).load::<Protocol>(conn)

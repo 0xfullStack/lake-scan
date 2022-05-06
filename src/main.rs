@@ -33,12 +33,12 @@ async fn main() -> std::io::Result<()> {
                     .guard(guard::Header("content-type", "application/json"))
                     .service(dex::liquidity_pool)
                     .service(dex::pool_balance)
+                    .service(dex::protocols)
             )
             .service(
                 web::scope("/lend")
                     .service(lend::balance)
             )
-            // .service(default::handler::index)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
@@ -54,8 +54,6 @@ fn server_error<B>(mut res: dev::ServiceResponse<B>) -> Result<ErrorHandlerRespo
         .map_into_right_body();
 
     Ok(ErrorHandlerResponse::Response(res))
-
-
 }
 
 pub mod default {
@@ -63,8 +61,6 @@ pub mod default {
         use actix_web::HttpResponse;
         pub async fn index() -> HttpResponse {
             HttpResponse::Ok()
-                .content_type("plain/text")
-                .append_header(("rusher", "rushing"))
                 .body("rusher")
         }
     }
