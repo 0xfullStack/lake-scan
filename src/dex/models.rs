@@ -1,6 +1,7 @@
 use diesel::prelude::*;
 use diesel::table;
-use crate::db::schema::{pairs, protocols};
+use crate::db::schema::pairs::dsl::{id as pair_id, *};
+use crate::db::schema::protocols::dsl::{id as protocol_id, name as protocol_name, *};
 
 use serde_derive::{Serialize, Deserialize};
 
@@ -28,23 +29,43 @@ pub struct Pair {
     pub factory: String
 }
 
-impl Protocol {
-    pub fn get_protocols(conn: &PgConnection) -> QueryResult<Vec<Protocol>> {
-        protocols::dsl::protocols.order(protocols::id.desc()).load::<Protocol>(conn)
-    }
-    pub fn get_protocol_by_name(name: &str, conn: &PgConnection) -> QueryResult<Vec<Protocol>> {
-        protocols::dsl::protocols.filter(protocols::name.like(name.to_string())).load::<Protocol>(conn)
-    }
-    pub fn get_protocol_by_address(address: &str, conn: &PgConnection) -> QueryResult<Vec<Protocol>> {
-        protocols::dsl::protocols.filter(protocols::factory_address.eq_all(address)).load::<Protocol>(conn)
-    }
+pub fn get_protocols(conn: &PgConnection) -> Result<Option<Vec<Protocol>>, DBError> {
+    let protocol_list = protocols
+        .order(protocol_id.desc())
+        .load::<Protocol>(conn)
+        .optional()?;
+    Ok(protocol_list)
+}
+// pub fn get_protocol_by_name(name: &str, conn: &PgConnection) -> Result<Option<Vec<Protocol>>, DBError> {
+//     let protocol = protocols
+//         .filter(protocol_name.like(name.to_string()))
+//         .load::<Protocol>(conn)
+//         .optional()?;
+//     Ok(protocol)
+// }
+
+pub fn get_protocol_by_address(address: &str, conn: &PgConnection) -> Result<Option<Protocol>, DBError> {
+    let protocol = protocols
+        .filter(factory_address.eq(address))
+        .first::<Protocol>(conn)
+        .optional()?;
+    Ok(protocol)
 }
 
-impl Pair {
-    pub fn get_pairs(conn: &PgConnection) -> QueryResult<Vec<Pair>> {
-        pairs::dsl::pairs.order(pairs::id.desc()).load::<Pair>(conn)
-    }
-    pub fn get_pair_by(address: &str, conn: &PgConnection) -> QueryResult<Vec<Pair>> {
-        pairs::dsl::pairs.filter(pairs::pair_address.eq_all(address)).load::<Pair>(conn)
-    }
+pub fn get_pairs(conn: &PgConnection) -> Result<Option<Vec<Pair>>, DBError> {
+    let pair_list = pairs
+        .order(pair_id.desc())
+        .load::<Pair>(conn)
+        .optional()?;
+    Ok(pair_list)
+}
+
+type DBError = Box<dyn std::error::Error + Send + Sync>;
+
+pub fn get_pair_by_address(address: &str, conn: &PgConnection) -> Result<Option<Pair>, DBError> {
+    let pair = pairs
+        .filter(pair_address.eq(address))
+        .first::<Pair>(conn)
+        .optional()?;
+    Ok(pair)
 }

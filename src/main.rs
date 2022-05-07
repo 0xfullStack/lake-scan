@@ -5,34 +5,38 @@ mod db;
 mod dex;
 mod lend;
 mod nft;
-mod state;
 
-use actix::{Actor, SyncArbiter};
 use actix_web::{App, HttpServer, dev, guard, http, HttpRequest, HttpResponse, Responder, Result, web};
 use actix_web::body::EitherBody;
 use actix_web::dev::ServiceResponse;
 use actix_web::middleware::{
     DefaultHeaders, ErrorHandlerResponse, ErrorHandlers, Logger
 };
-
-use crate::{ dex::handlers as dex_handlers };
+use std::env;
 use env_logger;
 use env_logger::Env;
+use db::postgres::*;
+use dotenv::dotenv;
 
-use db::postgres::PgPool;
+use crate::{ dex::handlers as dex_handlers };
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
+    dotenv().ok();
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
-    HttpServer::new(|| {
+    // DB pool
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = init_pool(&database_url).expect("Failed to create pool");
+
+    HttpServer::new( move || {
         App::new()
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .wrap(DefaultHeaders::new().add(("version", "0.1")))
             .wrap(ErrorHandlers::new().handler(http::StatusCode::INTERNAL_SERVER_ERROR, server_error))
-            // .app_data()
+            .app_data(web::Data::new(pool.clone()))
             .service(
                 web::scope("/dex")
                     .guard(guard::Header("content-type", "application/json"))
