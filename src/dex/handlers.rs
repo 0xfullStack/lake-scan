@@ -5,7 +5,7 @@ use actix_web::{
 };
 
 use serde::Serialize;
-use crate::models::{Pair, Protocol};
+use super::models::{Pair, Protocol};
 
 #[actix_web::get("/protocols")]
 pub async fn protocols() -> Result<HttpResponse> {
@@ -29,13 +29,6 @@ pub async fn liquidity_pool(path: web::Path<String>) -> Result<HttpResponse> {
                 factory: "".to_string()
             }
         )
-    )
-}
-
-#[actix_web::get("/pool-balance/{address}")]
-pub async fn pool_balance(path: web::Path<String>) -> Result<HttpResponse> {
-    Ok(
-        HttpResponse::Ok().body(format!("Not Implemented"))
     )
 }
 
