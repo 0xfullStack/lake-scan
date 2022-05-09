@@ -54,8 +54,8 @@ pub async fn liquidity_pool(pool: web::Data<PgPool>, path: web::Path<String>) ->
     .await?
     .map_err(actix_web::error::ErrorInternalServerError)?;
 
-    if let Some(user) = user {
-        Ok(HttpResponse::Ok().json(user))
+    if let Some(pair) = pair {
+        Ok(HttpResponse::Ok().json(pair))
     } else {
         // let address = path.into_inner();
         let res = HttpResponse::NotFound().body(format!("No pair found with address"));
