@@ -24,8 +24,8 @@ pub async fn protocols() -> Result<HttpResponse> {
                     pair_index: 0,
                     token0: "".to_string(),
                     token1: "".to_string(),
-                    reserve0: 2,
-                    reserve1: 1,
+                    reserve0: 2.to_string(),
+                    reserve1: 1.to_string(),
                     factory: "".to_string()
                 },
                 Pair {
@@ -34,8 +34,8 @@ pub async fn protocols() -> Result<HttpResponse> {
                     pair_index: 0,
                     token0: "".to_string(),
                     token1: "".to_string(),
-                    reserve0: 2,
-                    reserve1: 1,
+                    reserve0: 2.to_string(),
+                    reserve1: 1.to_string(),
                     factory: "".to_string()
                 }
             ]
@@ -48,7 +48,7 @@ pub async fn liquidity_pool(pool: web::Data<PgPool>, path: web::Path<String>) ->
     let address = path.into_inner();
     let conn = pool.get().expect("couldn't get db connection from pool");
 
-    let user = web::block(move ||
+    let pair = web::block(move ||
         get_pair_by_address(&address, &conn)
     )
     .await?
