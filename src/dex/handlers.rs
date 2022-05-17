@@ -21,22 +21,26 @@ pub async fn protocols() -> Result<HttpResponse> {
                 Pair {
                     id: 0,
                     pair_address: "test 1".to_string(),
-                    pair_index: 0,
                     token0: "".to_string(),
                     token1: "".to_string(),
+                    block_number: 0,
+                    block_hash: "".to_string(),
+                    transaction_hash: "".to_string(),
                     reserve0: 2.to_string(),
                     reserve1: 1.to_string(),
-                    factory: "".to_string()
+                    factory_address: "".to_string()
                 },
                 Pair {
                     id: 0,
                     pair_address: "test 2".to_string(),
-                    pair_index: 0,
                     token0: "".to_string(),
                     token1: "".to_string(),
+                    block_number: 0,
+                    block_hash: "".to_string(),
+                    transaction_hash: "".to_string(),
                     reserve0: 2.to_string(),
                     reserve1: 1.to_string(),
-                    factory: "".to_string()
+                    factory_address: "".to_string()
                 }
             ]
         )
