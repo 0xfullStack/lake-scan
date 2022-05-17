@@ -1,17 +1,11 @@
-use std::future::Future;
-use std::ops::Deref;
 use actix_web::{
     web, HttpRequest, HttpResponse, Responder,
     body::BoxBody,
     Result,
     Error
 };
-use diesel::QueryResult;
-
-use serde::Serialize;
-use crate::db::postgres::{Database, PgPool};
+use crate::db::postgres::PgPool;
 use crate::dex::models::*;
-use super::models::{Pair, Protocol};
 
 #[actix_web::get("/protocols")]
 pub async fn protocols() -> Result<HttpResponse> {

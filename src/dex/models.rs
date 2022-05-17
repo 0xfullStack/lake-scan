@@ -1,7 +1,6 @@
 use diesel::prelude::*;
-use diesel::table;
-use crate::db::schema::Pair::dsl::{*, pair_address, id as pair_id };
-use crate::db::schema::Protocol::dsl::{  *, id as protocol_id, name as protocol_name, factory_address };
+use crate::db::schema::Pair::dsl::{*, pair_address };
+use crate::db::schema::Protocol::dsl::{  *, id as protocol_id, factory_address };
 
 use serde_derive::{Serialize, Deserialize};
 

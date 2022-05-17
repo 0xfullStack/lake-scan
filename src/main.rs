@@ -6,8 +6,7 @@ mod dex;
 mod lend;
 mod nft;
 
-use actix_web::{App, HttpServer, dev, guard, http, HttpRequest, HttpResponse, Responder, Result, web};
-use actix_web::body::EitherBody;
+use actix_web::{App, HttpServer, dev, guard, http, Result, web};
 use actix_web::dev::ServiceResponse;
 use actix_web::middleware::{
     DefaultHeaders, ErrorHandlerResponse, ErrorHandlers, Logger
