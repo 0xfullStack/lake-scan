@@ -8,8 +8,6 @@ table! {
         block_number -> Int8,
         block_hash -> Text,
         transaction_hash -> Text,
-        reserve0 -> Text,
-        reserve1 -> Text,
     }
 }
 
@@ -26,7 +24,21 @@ table! {
     }
 }
 
+table! {
+    ReserveLog (id) {
+        id -> Int8,
+        pair_address -> Bpchar,
+        reserve0 -> Text,
+        reserve1 -> Text,
+        block_number -> Int8,
+        block_hash -> Text,
+        transaction_hash -> Text,
+        log_index -> Int8,
+    }
+}
+
 allow_tables_to_appear_in_same_query!(
     Pair,
-    Protocol
+    Protocol,
+    ReserveLog,
 );

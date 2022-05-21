@@ -5,38 +5,13 @@ use actix_web::{
     Error
 };
 use crate::db::postgres::PgPool;
-use crate::dex::models::*;
+use crate::dex::models::{get_latest_pair_reserves, get_pair_by_address, Pair, Protocol, PairRes};
 
 #[actix_web::get("/protocols")]
 pub async fn protocols() -> Result<HttpResponse> {
     Ok(
         HttpResponse::Ok().json(
-            vec![
-                Pair {
-                    id: 0,
-                    pair_address: "test 1".to_string(),
-                    token0: "".to_string(),
-                    token1: "".to_string(),
-                    block_number: 0,
-                    block_hash: "".to_string(),
-                    transaction_hash: "".to_string(),
-                    reserve0: 2.to_string(),
-                    reserve1: 1.to_string(),
-                    factory_address: "".to_string()
-                },
-                Pair {
-                    id: 0,
-                    pair_address: "test 2".to_string(),
-                    token0: "".to_string(),
-                    token1: "".to_string(),
-                    block_number: 0,
-                    block_hash: "".to_string(),
-                    transaction_hash: "".to_string(),
-                    reserve0: 2.to_string(),
-                    reserve1: 1.to_string(),
-                    factory_address: "".to_string()
-                }
-            ]
+            Vec::<Pair>::new()
         )
     )
 }
@@ -45,6 +20,8 @@ pub async fn protocols() -> Result<HttpResponse> {
 pub async fn liquidity_pool(pool: web::Data<PgPool>, path: web::Path<String>) -> Result<HttpResponse, Error> {
     let address = path.into_inner();
     let conn = pool.get().expect("couldn't get db connection from pool");
+    let clone_address = address.clone();
+    let clone_conn = pool.get().expect("couldn't get db connection from pool");
 
     let pair = web::block(move ||
         get_pair_by_address(&address, &conn)
@@ -52,8 +29,26 @@ pub async fn liquidity_pool(pool: web::Data<PgPool>, path: web::Path<String>) ->
     .await?
     .map_err(actix_web::error::ErrorInternalServerError)?;
 
+    let reserves = web::block(move ||
+        get_latest_pair_reserves(&clone_address, &clone_conn)
+    )
+    .await?
+    .map_err(actix_web::error::ErrorInternalServerError)?;
+
     if let Some(pair) = pair {
-        Ok(HttpResponse::Ok().json(pair))
+        let pair_res = PairRes {
+            id: pair.id,
+            pair_address: pair.pair_address,
+            factory_address: pair.factory_address,
+            token0: pair.token0,
+            token1: pair.token1,
+            block_number: pair.block_number,
+            block_hash: pair.block_hash,
+            transaction_hash: pair.transaction_hash,
+            reserve0: reserves.0,
+            reserve1: reserves.1,
+        };
+        Ok(HttpResponse::Ok().json(pair_res))
     } else {
         // let address = path.into_inner();
         let res = HttpResponse::NotFound().body(format!("No pair found with address"));

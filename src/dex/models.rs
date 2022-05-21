@@ -3,6 +3,8 @@ use crate::db::schema::Pair::dsl::{*, pair_address };
 use crate::db::schema::Protocol::dsl::{  *, id as protocol_id, factory_address };
 
 use serde_derive::{Serialize, Deserialize};
+use crate::db::schema::ReserveLog;
+use crate::db::schema::ReserveLog::{block_number as reserveLog_block_number, log_index, pair_address as reserveLog_pair_address, reserve0, reserve1};
 
 #[derive(Queryable, Debug, Serialize, Deserialize)]
 pub struct Protocol {
@@ -25,9 +27,7 @@ pub struct Pair {
     pub token1: String,
     pub block_number: i64,
     pub block_hash: String,
-    pub transaction_hash: String,
-    pub reserve0: String,
-    pub reserve1: String
+    pub transaction_hash: String
 }
 
 pub fn get_protocols(conn: &PgConnection) -> Result<Option<Vec<Protocol>>, DBError> {
@@ -69,4 +69,29 @@ pub fn get_pair_by_address(address: &str, conn: &PgConnection) -> Result<Option<
         .first::<Pair>(conn)
         .optional()?;
     Ok(pair)
+}
+
+pub fn get_latest_pair_reserves(pair_address_: &str, conn: &PgConnection) -> QueryResult<(String, String)> {
+    // SELECT * FROM "ReserveLog" WHERE pair_address = '0xe0cc5afc0ff2c76183416fb8d1a29f6799fb2cdf' ORDER BY (block_number, log_index) DESC
+    ReserveLog::table
+        .select((reserve0, reserve1))
+        .filter(reserveLog_pair_address.eq(pair_address_))
+        .order_by((reserveLog_block_number.desc(), log_index.desc()))
+        .limit(1)
+        .get_result(conn)
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PairRes {
+    pub id: i64,
+    pub pair_address: String,
+    pub factory_address: String,
+    pub token0: String,
+    pub token1: String,
+    pub block_number: i64,
+    pub block_hash: String,
+    pub transaction_hash: String,
+    pub reserve0: String,
+    pub reserve1: String,
 }
